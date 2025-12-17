@@ -21,9 +21,10 @@ import {
   DistrictType,
   ResourceType,
   ResourceCategory,
+  WonderType,
 } from '../../core';
 import { RESOURCE_DATA } from '../../core/gameData';
-import { DISTRICT_ICONS, RESOURCE_ICONS, FEATURE_ICONS, TERRAIN_ICONS } from '../../core/icons';
+import { DISTRICT_ICONS, RESOURCE_ICONS, FEATURE_ICONS, TERRAIN_ICONS, WONDER_ICONS } from '../../core/icons';
 
 interface HexMapProps {
   map: GameMap;
@@ -240,16 +241,6 @@ export const HexMap: React.FC<HexMapProps> = ({
     return colors[tile.terrain] || '#888888';
   }, []);
 
-  const getFeatureOverlay = useCallback((tile: Tile): string | null => {
-    if (tile.feature === FeatureType.WOODS) return 'rgba(34, 85, 34, 0.5)';
-    if (tile.feature === FeatureType.RAINFOREST) return 'rgba(0, 80, 20, 0.6)';
-    if (tile.feature === FeatureType.MARSH) return 'rgba(60, 90, 80, 0.4)';
-    if (tile.feature === FeatureType.FLOODPLAINS) return 'rgba(139, 195, 74, 0.3)';
-    if (tile.feature === FeatureType.OASIS) return 'rgba(0, 150, 136, 0.4)';
-    if (tile.feature === FeatureType.GEOTHERMAL_FISSURE) return 'rgba(255, 152, 0, 0.4)';
-    return null;
-  }, []);
-
   const getDistrictIconUrl = useCallback((district: DistrictType): string | null => {
     const iconKey = district as keyof typeof DISTRICT_ICONS;
     return DISTRICT_ICONS[iconKey] || DISTRICT_ICONS.district || null;
@@ -265,6 +256,12 @@ export const HexMap: React.FC<HexMapProps> = ({
     if (feature === FeatureType.NONE) return null;
     const iconKey = feature as keyof typeof FEATURE_ICONS;
     return FEATURE_ICONS[iconKey] || null;
+  }, []);
+
+  const getWonderIconUrl = useCallback((wonder: WonderType): string | null => {
+    if (wonder === WonderType.NONE) return null;
+    const iconKey = wonder as keyof typeof WONDER_ICONS;
+    return WONDER_ICONS[iconKey] || WONDER_ICONS.wonder || null;
   }, []);
 
   const getTerrainIconUrl = useCallback((tile: Tile): string | null => {
@@ -308,10 +305,10 @@ export const HexMap: React.FC<HexMapProps> = ({
 
     const terrainColor = getTerrainColor(tile);
     const terrainIconUrl = getTerrainIconUrl(tile);
-    const featureOverlay = getFeatureOverlay(tile);
     const districtIconUrl = tile.hasDistrict ? getDistrictIconUrl(tile.district) : null;
     const resourceIconUrl = !tile.hasDistrict ? getResourceIconUrl(tile.resource) : null;
     const featureIconUrl = !tile.hasDistrict && tile.feature !== FeatureType.NONE ? getFeatureIconUrl(tile.feature) : null;
+    const wonderIconUrl = tile.hasWonder ? getWonderIconUrl(tile.wonder) : null;
 
     return (
       <g
@@ -349,14 +346,6 @@ export const HexMap: React.FC<HexMapProps> = ({
           />
         )}
 
-        {/* Feature overlay */}
-        {featureOverlay && (
-          <polygon
-            points={getHexPoints(0, 0, HEX_SIZE)}
-            fill={featureOverlay}
-          />
-        )}
-
         {/* River edges */}
         {tile.hasRiver && Array.from(tile.riverEdges).map(edge => {
           const angle = (Math.PI / 6) + (Math.PI / 3) * edge;
@@ -390,16 +379,18 @@ export const HexMap: React.FC<HexMapProps> = ({
           />
         )}
 
-        {/* Feature icon (when no district) */}
+        {/* Feature icon overlay (upscaled like terrain, when no district) */}
         {featureIconUrl && !tile.hasDistrict && (
           <image
             xlinkHref={featureIconUrl}
             href={featureIconUrl}
-            x={-ICON_SIZE * 0.35}
-            y={-ICON_SIZE * 0.35}
-            width={ICON_SIZE * 0.7}
-            height={ICON_SIZE * 0.7}
-            style={{ pointerEvents: 'none', opacity: 0.8 }}
+            x={-HEX_SIZE * 1.2}
+            y={-HEX_SIZE * 1.2}
+            width={HEX_SIZE * 2.4}
+            height={HEX_SIZE * 2.4}
+            clipPath={`url(#hex-clip-${key})`}
+            preserveAspectRatio="xMidYMid slice"
+            style={{ pointerEvents: 'none' }}
           />
         )}
 
@@ -429,21 +420,17 @@ export const HexMap: React.FC<HexMapProps> = ({
           />
         )}
 
-        {/* Wonder indicator */}
-        {tile.hasWonder && (
-          <g transform="translate(0, -12)">
-            <circle r={8} fill="rgba(201, 162, 39, 0.8)" />
-            <text
-              x={0}
-              y={4}
-              textAnchor="middle"
-              fontSize={10}
-              fill="#fff"
-              style={{ pointerEvents: 'none' }}
-            >
-              ★
-            </text>
-          </g>
+        {/* Wonder icon */}
+        {wonderIconUrl && (
+          <image
+            xlinkHref={wonderIconUrl}
+            href={wonderIconUrl}
+            x={-ICON_SIZE * 0.8}
+            y={-ICON_SIZE * 0.8}
+            width={ICON_SIZE * 1.6}
+            height={ICON_SIZE * 1.6}
+            style={{ pointerEvents: 'none' }}
+          />
         )}
 
         {/* Multi-selection highlight */}
@@ -472,10 +459,10 @@ export const HexMap: React.FC<HexMapProps> = ({
     getHexPoints,
     getTerrainColor,
     getTerrainIconUrl,
-    getFeatureOverlay,
     getDistrictIconUrl,
     getResourceIconUrl,
     getFeatureIconUrl,
+    getWonderIconUrl,
     selectedCoord,
     selectedCoords,
     cityCenter,

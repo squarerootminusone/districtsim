@@ -101,7 +101,7 @@ export const FEATURE_DATA: Record<FeatureType, FeatureInfo> = {
   [FeatureType.RAINFOREST]: {
     name: 'Rainforest',
     yields: { ...EMPTY_YIELDS, food: 1 },
-    validTerrains: [TerrainType.PLAINS],
+    validTerrains: [TerrainType.PLAINS, TerrainType.GRASS],
     removable: true,
     appealModifier: -1,
   },

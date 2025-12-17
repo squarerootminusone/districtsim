@@ -4,7 +4,7 @@
  * Allows editing properties of a selected tile with Civ6 icons.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Tile,
   HexCoord,
@@ -97,6 +97,7 @@ export const TileEditor: React.FC<TileEditorProps> = ({
   onToggleRiverEdge,
   onSetCityCenter,
 }) => {
+  const [selectedEra, setSelectedEra] = useState<string>('ancient');
   const isMultiSelect = selectedCount > 1;
   if (!tile) {
     return (
@@ -145,19 +146,86 @@ export const TileEditor: React.FC<TileEditorProps> = ({
     value: d,
   }));
 
-  const wonderOptions = [
-    { label: 'None', value: WonderType.NONE },
-    { label: 'Stonehenge', value: WonderType.STONEHENGE },
-    { label: 'Pyramids', value: WonderType.PYRAMIDS },
-    { label: 'Hanging Gardens', value: WonderType.HANGING_GARDENS },
-    { label: 'Oracle', value: WonderType.ORACLE },
-    { label: 'Colosseum', value: WonderType.COLOSSEUM },
-    { label: 'Petra', value: WonderType.PETRA },
-    { label: 'Great Library', value: WonderType.GREAT_LIBRARY },
-    { label: 'Alhambra', value: WonderType.ALHAMBRA },
-    { label: 'Forbidden City', value: WonderType.FORBIDDEN_CITY },
-    { label: 'Taj Mahal', value: WonderType.TAJ_MAHAL },
-  ];
+  // Wonders organized by era
+  const wondersByEra = {
+    ancient: [
+      { label: 'Stonehenge', value: WonderType.STONEHENGE },
+      { label: 'Pyramids', value: WonderType.PYRAMIDS },
+      { label: 'Hanging Gardens', value: WonderType.HANGING_GARDENS },
+      { label: 'Oracle', value: WonderType.ORACLE },
+      { label: 'Great Bath', value: WonderType.GREAT_BATH },
+      { label: 'Temple of Artemis', value: WonderType.TEMPLE_OF_ARTEMIS },
+      { label: 'Etemenanki', value: WonderType.ETEMENANKI },
+    ],
+    classical: [
+      { label: 'Colosseum', value: WonderType.COLOSSEUM },
+      { label: 'Colossus', value: WonderType.COLOSSUS },
+      { label: 'Great Library', value: WonderType.GREAT_LIBRARY },
+      { label: 'Great Lighthouse', value: WonderType.GREAT_LIGHTHOUSE },
+      { label: 'Jebel Barkal', value: WonderType.JEBEL_BARKAL },
+      { label: 'Mahabodhi Temple', value: WonderType.MAHABODHI_TEMPLE },
+      { label: 'Mausoleum at Halicarnassus', value: WonderType.MAUSOLEUM_AT_HALICARNASSUS },
+      { label: 'Petra', value: WonderType.PETRA },
+      { label: 'Terracotta Army', value: WonderType.TERRACOTTA_ARMY },
+      { label: 'Apadana', value: WonderType.APADANA },
+      { label: 'Statue of Zeus', value: WonderType.STATUE_OF_ZEUS },
+    ],
+    medieval: [
+      { label: 'Alhambra', value: WonderType.ALHAMBRA },
+      { label: 'Angkor Wat', value: WonderType.ANGKOR_WAT },
+      { label: 'Chichen Itza', value: WonderType.CHICHEN_ITZA },
+      { label: 'Hagia Sophia', value: WonderType.HAGIA_SOPHIA },
+      { label: 'Kilwa Kisiwani', value: WonderType.KILWA_KISIWANI },
+      { label: 'Kotoku-in', value: WonderType.KOTOKU_IN },
+      { label: 'Meenakshi Temple', value: WonderType.MEENAKSHI_TEMPLE },
+      { label: 'Mont St. Michel', value: WonderType.MONT_ST_MICHEL },
+      { label: 'Universidad de Salamanca', value: WonderType.UNIVERSIDAD_DE_SALAMANCA },
+    ],
+    renaissance: [
+      { label: 'Forbidden City', value: WonderType.FORBIDDEN_CITY },
+      { label: 'Great Zimbabwe', value: WonderType.GREAT_ZIMBABWE },
+      { label: 'Huey Teocalli', value: WonderType.HUEY_TEOCALLI },
+      { label: 'Potala Palace', value: WonderType.POTALA_PALACE },
+      { label: "St. Basil's Cathedral", value: WonderType.ST_BASILS_CATHEDRAL },
+      { label: 'Taj Mahal', value: WonderType.TAJ_MAHAL },
+      { label: 'Torre de Belém', value: WonderType.TORRE_DE_BELEM },
+      { label: 'Venetian Arsenal', value: WonderType.VENETIAN_ARSENAL },
+    ],
+    industrial: [
+      { label: 'Big Ben', value: WonderType.BIG_BEN },
+      { label: 'Bolshoi Theatre', value: WonderType.BOLSHOI_THEATRE },
+      { label: 'Hermitage', value: WonderType.HERMITAGE },
+      { label: 'Oxford University', value: WonderType.OXFORD_UNIVERSITY },
+      { label: 'Ruhr Valley', value: WonderType.RUHR_VALLEY },
+      { label: 'Statue of Liberty', value: WonderType.STATUE_OF_LIBERTY },
+    ],
+    modern: [
+      { label: 'Broadway', value: WonderType.BROADWAY },
+      { label: 'Cristo Redentor', value: WonderType.CRISTO_REDENTOR },
+      { label: 'Eiffel Tower', value: WonderType.EIFFEL_TOWER },
+      { label: 'Golden Gate Bridge', value: WonderType.GOLDEN_GATE_BRIDGE },
+      { label: 'Panama Canal', value: WonderType.PANAMA_CANAL },
+    ],
+    atomic: [
+      { label: 'Biosphere', value: WonderType.BIOSPHERE },
+      { label: 'Estádio do Maracanã', value: WonderType.ESTÁDIO_DO_MARACANÃ },
+      { label: 'Sydney Opera House', value: WonderType.SYDNEY_OPERA_HOUSE },
+    ],
+    information: [
+      { label: 'Amundsen-Scott Research Station', value: WonderType.AMUNDSEN_SCOTT_RESEARCH_STATION },
+    ],
+  };
+
+  const eraLabels: Record<string, string> = {
+    ancient: 'Ancient',
+    classical: 'Classical',
+    medieval: 'Medieval',
+    renaissance: 'Renaissance',
+    industrial: 'Industrial',
+    modern: 'Modern',
+    atomic: 'Atomic',
+    information: 'Info',
+  };
 
   return (
     <div className="panel">
@@ -328,17 +396,54 @@ export const TileEditor: React.FC<TileEditorProps> = ({
 
         {/* Wonder */}
         <div>
-          <label className="label">Wonder</label>
+          <label className="label flex items-center justify-between">
+            <span>Wonder</span>
+            {tile.wonder !== WonderType.NONE && (
+              <button
+                onClick={() => onSetWonder(WonderType.NONE)}
+                className="text-xs text-red-400 hover:text-red-300"
+              >
+                Clear
+              </button>
+            )}
+          </label>
+          
+          {/* Era Tabs */}
+          <div className="flex flex-wrap gap-1 mb-2">
+            {Object.keys(wondersByEra).map(era => (
+              <button
+                key={era}
+                onClick={() => setSelectedEra(era)}
+                className={`px-2 py-1 text-xs rounded transition-colors ${
+                  selectedEra === era
+                    ? 'bg-civ-accent text-civ-bg font-medium'
+                    : 'bg-civ-surface border border-civ-border text-gray-400 hover:bg-civ-hover'
+                }`}
+              >
+                {eraLabels[era]}
+              </button>
+            ))}
+          </div>
+          
+          {/* Wonder Select for Selected Era */}
           <select
             className="select"
             value={tile.wonder}
             onChange={(e) => onSetWonder(e.target.value as WonderType)}
             disabled={tile.isMountain || tile.isWater}
           >
-            {wonderOptions.map(opt => (
+            <option value={WonderType.NONE}>None</option>
+            {wondersByEra[selectedEra as keyof typeof wondersByEra].map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
+          
+          {/* Current wonder indicator if from different era */}
+          {tile.wonder !== WonderType.NONE && !wondersByEra[selectedEra as keyof typeof wondersByEra].some(w => w.value === tile.wonder) && (
+            <div className="mt-1 text-xs text-civ-accent">
+              ✨ Current: {Object.values(wondersByEra).flat().find(w => w.value === tile.wonder)?.label || tile.wonder}
+            </div>
+          )}
         </div>
 
         {/* River Edges */}

@@ -11,7 +11,7 @@
  *   - /bonus/               - Bonus resources
  *   - /luxury/              - Luxury resources
  *   - /strategic/           - Strategic resources
- * - /icons/wonders/          - Player-built wonders
+ * - /icons/player_wonders/   - Player-built wonders
  * - /icons/natural_wonders/  - Natural wonders
  */
 
@@ -179,42 +179,42 @@ export const WONDER_ICONS = {
   // Generic
   wonder: '/icons/districts/wonder.webp',
   // Ancient Era
-  stonehenge: '/icons/wonders/stonehenge.webp',
-  pyramids: '/icons/wonders/pyramids.webp',
-  hanging_gardens: '/icons/wonders/hanging_gardens.webp',
-  oracle: '/icons/wonders/oracle.webp',
+  stonehenge: '/icons/player_wonders/stonehenge.webp',
+  pyramids: '/icons/player_wonders/pyramids.webp',
+  hanging_gardens: '/icons/player_wonders/hanging_gardens.webp',
+  oracle: '/icons/player_wonders/oracle.webp',
   // Classical Era
-  colosseum: '/icons/wonders/colosseum.webp',
-  colossus: '/icons/wonders/colossus.webp',
-  great_library: '/icons/wonders/great_library.webp',
-  great_lighthouse: '/icons/wonders/great_lighthouse.webp',
-  mahabodhi_temple: '/icons/wonders/mahabodhi_temple.webp',
-  petra: '/icons/wonders/petra.webp',
-  terracotta_army: '/icons/wonders/terracotta_army.webp',
+  colosseum: '/icons/player_wonders/colosseum.webp',
+  colossus: '/icons/player_wonders/colossus.webp',
+  great_library: '/icons/player_wonders/great_library.webp',
+  great_lighthouse: '/icons/player_wonders/great_lighthouse.webp',
+  mahabodhi_temple: '/icons/player_wonders/mahabodhi_temple.webp',
+  petra: '/icons/player_wonders/petra.webp',
+  terracotta_army: '/icons/player_wonders/terracotta_army.webp',
   // Medieval Era
-  alhambra: '/icons/wonders/alhambra.webp',
-  chichen_itza: '/icons/wonders/chichen_itza.webp',
-  hagia_sophia: '/icons/wonders/hagia_sophia.webp',
-  mont_st_michel: '/icons/wonders/mont_st_michel.webp',
+  alhambra: '/icons/player_wonders/alhambra.webp',
+  chichen_itza: '/icons/player_wonders/chichen_itza.webp',
+  hagia_sophia: '/icons/player_wonders/hagia_sophia.webp',
+  mont_st_michel: '/icons/player_wonders/mont_st_michel.webp',
   // Renaissance Era
-  forbidden_city: '/icons/wonders/forbidden_city.webp',
-  great_zimbabwe: '/icons/wonders/great_zimbabwe.webp',
-  huey_teocalli: '/icons/wonders/huey_teocalli.webp',
-  potala_palace: '/icons/wonders/potala_palace.webp',
-  venetian_arsenal: '/icons/wonders/venetian_arsenal.webp',
+  forbidden_city: '/icons/player_wonders/forbidden_city.webp',
+  great_zimbabwe: '/icons/player_wonders/great_zimbabwe.webp',
+  huey_teocalli: '/icons/player_wonders/huey_teocalli.webp',
+  potala_palace: '/icons/player_wonders/potala_palace.webp',
+  venetian_arsenal: '/icons/player_wonders/venetian_arsenal.webp',
   // Industrial Era
-  big_ben: '/icons/wonders/big_ben.webp',
-  bolshoi_theatre: '/icons/wonders/bolshoi_theatre.webp',
-  hermitage: '/icons/wonders/hermitage.webp',
-  oxford_university: '/icons/wonders/oxford_university.webp',
-  ruhr_valley: '/icons/wonders/ruhr_valley.webp',
+  big_ben: '/icons/player_wonders/big_ben.webp',
+  bolshoi_theatre: '/icons/player_wonders/bolshoi_theatre.webp',
+  hermitage: '/icons/player_wonders/hermitage.webp',
+  oxford_university: '/icons/player_wonders/oxford_university.webp',
+  ruhr_valley: '/icons/player_wonders/ruhr_valley.webp',
   // Modern Era
-  broadway: '/icons/wonders/broadway.webp',
-  cristo_redentor: '/icons/wonders/cristo_redentor.webp',
-  eiffel_tower: '/icons/wonders/eiffel_tower.webp',
+  broadway: '/icons/player_wonders/broadway.webp',
+  cristo_redentor: '/icons/player_wonders/cristo_redentor.webp',
+  eiffel_tower: '/icons/player_wonders/eiffel_tower.webp',
   // Atomic Era
-  estadio_do_maracana: '/icons/wonders/estadio_do_maracana.webp',
-  sydney_opera_house: '/icons/wonders/sydney_opera_house.webp',
+  estadio_do_maracana: '/icons/player_wonders/estadio_do_maracana.webp',
+  sydney_opera_house: '/icons/player_wonders/sydney_opera_house.webp',
 } as const;
 
 // ============================================================================
