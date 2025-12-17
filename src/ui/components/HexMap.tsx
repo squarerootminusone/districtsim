@@ -80,14 +80,28 @@ export const HexMap: React.FC<HexMapProps> = ({
     onZoomChange(zoom + delta);
   }, [zoom, onZoomChange]);
 
-  // Convert screen coordinates to SVG coordinates
+  // Convert screen coordinates to SVG coordinates using the inverse CTM
+  // This properly handles all transforms (CSS scale, translate, and SVG group transforms)
   const screenToSvg = useCallback((screenX: number, screenY: number): { x: number; y: number } | null => {
-    if (!svgRef.current || !containerRef.current) return null;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = (screenX - rect.left - panOffset.x) / zoom;
-    const y = (screenY - rect.top - panOffset.y) / zoom;
-    return { x, y };
-  }, [zoom, panOffset]);
+    if (!svgRef.current) return null;
+    const svg = svgRef.current;
+    
+    // Get the inner group element that contains the tiles
+    const group = svg.querySelector('g');
+    if (!group) return null;
+    
+    // Use SVG's getScreenCTM which accounts for ALL transforms including CSS
+    const ctm = group.getScreenCTM();
+    if (!ctm) return null;
+    
+    // Create a point and transform it using the inverse CTM
+    const point = svg.createSVGPoint();
+    point.x = screenX;
+    point.y = screenY;
+    const transformedPoint = point.matrixTransform(ctm.inverse());
+    
+    return { x: transformedPoint.x, y: transformedPoint.y };
+  }, []);
 
   // Find hex tile at SVG coordinates
   const findHexAtPosition = useCallback((svgX: number, svgY: number): HexCoord | null => {
