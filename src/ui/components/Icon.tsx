@@ -72,21 +72,11 @@ interface YieldIconProps {
   className?: string;
 }
 
-const YIELD_FALLBACKS: Record<YieldIconProps['type'], string> = {
-  food: '🌾',
-  production: '⚙️',
-  gold: '💰',
-  science: '🔬',
-  culture: '🎭',
-  faith: '✨',
-};
-
 export const YieldIcon: React.FC<YieldIconProps> = ({ type, size = 'md', className }) => (
   <Icon
     src={YIELD_ICONS[type]}
     alt={type.charAt(0).toUpperCase() + type.slice(1)}
     size={size}
-    fallback={YIELD_FALLBACKS[type]}
     className={className}
   />
 );

@@ -55,6 +55,7 @@ export class AdjacencyEngine {
    * Calculate all adjacency bonuses for districts within a city's range
    */
   calculateCityAdjacency(cityCenter: HexCoord): CityAdjacencyResult {
+    // In Civ6, cities can work tiles within 3 tiles of the city center
     const workableTiles = this.map.getTilesInRange(cityCenter, 3);
     const districtTiles = workableTiles.filter(t => 
       t.hasDistrict && t.district !== DistrictType.CITY_CENTER
@@ -266,6 +267,7 @@ export class AdjacencyEngine {
   private calculateTheaterSquareAdjacency(tile: Tile, neighbors: Tile[], bonuses: AdjacencyBonus[]): void {
     let wonderCount = 0;
     let districtCount = 0;
+    let entertainmentComplexCount = 0;
 
     for (const n of neighbors) {
       if (n.hasWonder) {
@@ -273,6 +275,9 @@ export class AdjacencyEngine {
       }
       if (n.hasDistrict) {
         districtCount++;
+        if (n.district === DistrictType.ENTERTAINMENT_COMPLEX) {
+          entertainmentComplexCount++;
+        }
       }
     }
 
@@ -282,6 +287,16 @@ export class AdjacencyEngine {
         yieldType: 'culture',
         amount: wonderCount * 2,
         source: `${wonderCount} Wonder(s)`,
+      });
+    }
+
+    // Entertainment Complex provides +2 culture each
+    if (entertainmentComplexCount > 0) {
+      bonuses.push({
+        districtType: DistrictType.THEATER_SQUARE,
+        yieldType: 'culture',
+        amount: entertainmentComplexCount * 2,
+        source: `${entertainmentComplexCount} Entertainment Complex(es)`,
       });
     }
 

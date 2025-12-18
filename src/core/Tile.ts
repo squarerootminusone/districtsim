@@ -155,7 +155,7 @@ export class Tile {
     // Clear improvement when placing district
     if (district !== DistrictType.NONE) {
       this._improvement = ImprovementType.NONE;
-      this._feature = FeatureType.NONE; // Districts remove features
+      // Note: Features like floodplains are preserved - they can coexist with districts
     }
     
     return this;

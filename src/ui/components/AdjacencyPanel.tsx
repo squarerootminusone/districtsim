@@ -185,22 +185,16 @@ export const AdjacencyPanel: React.FC<AdjacencyPanelProps> = ({
 
       <div className="panel-body space-y-4">
         {/* Total Yields Summary */}
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { label: 'Science', key: 'science' as keyof Yields },
-            { label: 'Culture', key: 'culture' as keyof Yields },
-            { label: 'Faith', key: 'faith' as keyof Yields },
-            { label: 'Gold', key: 'gold' as keyof Yields },
-            { label: 'Production', key: 'production' as keyof Yields },
-            { label: 'Food', key: 'food' as keyof Yields },
-          ].map(({ label, key }) => (
+        <div className="flex justify-between gap-1">
+          {(['food', 'production', 'gold', 'science', 'culture', 'faith'] as (keyof Yields)[]).map((key) => (
             <div 
               key={key}
-              className="p-2 bg-civ-surface rounded border border-civ-border/50 text-center"
+              className="flex-1 p-1.5 bg-civ-surface rounded border border-civ-border/50 text-center"
             >
-              <YieldIcon type={key} size="lg" className="mx-auto" />
-              <div className="text-xl font-bold text-white mt-1">{result.totalYields[key]}</div>
-              <div className="text-xs text-gray-500">{label}</div>
+              <div className="transform scale-[0.6] origin-center">
+                <YieldIcon type={key} size="xl" className="mx-auto" />
+              </div>
+              <div className="text-sm font-bold text-white -mt-1">{result.totalYields[key]}</div>
             </div>
           ))}
         </div>

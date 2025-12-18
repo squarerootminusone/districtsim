@@ -316,7 +316,7 @@ export const HexMap: React.FC<HexMapProps> = ({
     const terrainIconUrl = getTerrainIconUrl(tile);
     const districtIconUrl = tile.hasDistrict ? getDistrictIconUrl(tile.district) : null;
     const resourceIconUrl = !tile.hasDistrict ? getResourceIconUrl(tile.resource) : null;
-    const featureIconUrl = !tile.hasDistrict && tile.feature !== FeatureType.NONE ? getFeatureIconUrl(tile.feature) : null;
+    const featureIconUrl = tile.feature !== FeatureType.NONE ? getFeatureIconUrl(tile.feature) : null;
     const wonderIconUrl = tile.hasWonder ? getWonderIconUrl(tile.wonder) : null;
 
     return (
@@ -388,8 +388,8 @@ export const HexMap: React.FC<HexMapProps> = ({
           />
         )}
 
-        {/* Feature icon overlay (upscaled like terrain, when no district) */}
-        {featureIconUrl && !tile.hasDistrict && (
+        {/* Feature icon overlay (upscaled like terrain) */}
+        {featureIconUrl && (
           <image
             xlinkHref={featureIconUrl}
             href={featureIconUrl}

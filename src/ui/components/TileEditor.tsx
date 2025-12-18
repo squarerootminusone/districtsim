@@ -16,8 +16,18 @@ import {
   WonderType,
   Yields,
 } from '../../core';
-import { TERRAIN_DATA, FEATURE_DATA, RESOURCE_DATA, DISTRICT_DATA } from '../../core/gameData';
 import { YieldIcon, DistrictIcon, ResourceIcon, FeatureIcon, TerrainIcon } from './Icon';
+import { IconSelect, IconSelectOption } from './IconSelect';
+import {
+  TERRAIN_OPTIONS,
+  MODIFIER_OPTIONS,
+  getFeatureOptions,
+  RESOURCE_OPTIONS,
+  DISTRICT_OPTIONS,
+  WONDERS_BY_ERA,
+  ERA_LABELS,
+  ALL_WONDERS,
+} from '../data/dropdownOptions';
 
 interface TileEditorProps {
   tile: Tile | null;
@@ -119,115 +129,14 @@ export const TileEditor: React.FC<TileEditorProps> = ({
     cityCenter.q === tile.coord.q && 
     cityCenter.r === tile.coord.r;
 
-  // Options for selects
-  const terrainOptions = Object.values(TerrainType).map(t => ({
-    label: TERRAIN_DATA[t]?.name || t,
-    value: t,
+  // Get feature options with disabled state based on current terrain
+  const featureOptions = getFeatureOptions(tile.terrain);
+
+  // Terrain options with icons
+  const terrainOptionsWithIcons: IconSelectOption[] = TERRAIN_OPTIONS.map(opt => ({
+    ...opt,
+    icon: <TerrainIcon terrain={opt.value} size="sm" />,
   }));
-
-  const modifierOptions = Object.values(TerrainModifier).map(m => ({
-    label: m.charAt(0).toUpperCase() + m.slice(1),
-    value: m,
-  }));
-
-  const featureOptions = Object.values(FeatureType).map(f => ({
-    label: FEATURE_DATA[f]?.name || f,
-    value: f,
-    disabled: f !== FeatureType.NONE && !FEATURE_DATA[f]?.validTerrains.includes(tile.terrain),
-  }));
-
-  const resourceOptions = Object.values(ResourceType)
-    .filter(r => r === ResourceType.NONE || RESOURCE_DATA[r]?.category !== 'none')
-    .map(r => ({
-      label: RESOURCE_DATA[r]?.name || r,
-      value: r,
-    }));
-
-  const districtOptions = Object.values(DistrictType).map(d => ({
-    label: DISTRICT_DATA[d]?.name || d,
-    value: d,
-  }));
-
-  // Wonders organized by era
-  const wondersByEra = {
-    ancient: [
-      { label: 'Stonehenge', value: WonderType.STONEHENGE },
-      { label: 'Pyramids', value: WonderType.PYRAMIDS },
-      { label: 'Hanging Gardens', value: WonderType.HANGING_GARDENS },
-      { label: 'Oracle', value: WonderType.ORACLE },
-      { label: 'Great Bath', value: WonderType.GREAT_BATH },
-      { label: 'Temple of Artemis', value: WonderType.TEMPLE_OF_ARTEMIS },
-      { label: 'Etemenanki', value: WonderType.ETEMENANKI },
-    ],
-    classical: [
-      { label: 'Colosseum', value: WonderType.COLOSSEUM },
-      { label: 'Colossus', value: WonderType.COLOSSUS },
-      { label: 'Great Library', value: WonderType.GREAT_LIBRARY },
-      { label: 'Great Lighthouse', value: WonderType.GREAT_LIGHTHOUSE },
-      { label: 'Jebel Barkal', value: WonderType.JEBEL_BARKAL },
-      { label: 'Mahabodhi Temple', value: WonderType.MAHABODHI_TEMPLE },
-      { label: 'Mausoleum at Halicarnassus', value: WonderType.MAUSOLEUM_AT_HALICARNASSUS },
-      { label: 'Petra', value: WonderType.PETRA },
-      { label: 'Terracotta Army', value: WonderType.TERRACOTTA_ARMY },
-      { label: 'Apadana', value: WonderType.APADANA },
-      { label: 'Statue of Zeus', value: WonderType.STATUE_OF_ZEUS },
-    ],
-    medieval: [
-      { label: 'Alhambra', value: WonderType.ALHAMBRA },
-      { label: 'Angkor Wat', value: WonderType.ANGKOR_WAT },
-      { label: 'Chichen Itza', value: WonderType.CHICHEN_ITZA },
-      { label: 'Hagia Sophia', value: WonderType.HAGIA_SOPHIA },
-      { label: 'Kilwa Kisiwani', value: WonderType.KILWA_KISIWANI },
-      { label: 'Kotoku-in', value: WonderType.KOTOKU_IN },
-      { label: 'Meenakshi Temple', value: WonderType.MEENAKSHI_TEMPLE },
-      { label: 'Mont St. Michel', value: WonderType.MONT_ST_MICHEL },
-      { label: 'Universidad de Salamanca', value: WonderType.UNIVERSIDAD_DE_SALAMANCA },
-    ],
-    renaissance: [
-      { label: 'Forbidden City', value: WonderType.FORBIDDEN_CITY },
-      { label: 'Great Zimbabwe', value: WonderType.GREAT_ZIMBABWE },
-      { label: 'Huey Teocalli', value: WonderType.HUEY_TEOCALLI },
-      { label: 'Potala Palace', value: WonderType.POTALA_PALACE },
-      { label: "St. Basil's Cathedral", value: WonderType.ST_BASILS_CATHEDRAL },
-      { label: 'Taj Mahal', value: WonderType.TAJ_MAHAL },
-      { label: 'Torre de Belém', value: WonderType.TORRE_DE_BELEM },
-      { label: 'Venetian Arsenal', value: WonderType.VENETIAN_ARSENAL },
-    ],
-    industrial: [
-      { label: 'Big Ben', value: WonderType.BIG_BEN },
-      { label: 'Bolshoi Theatre', value: WonderType.BOLSHOI_THEATRE },
-      { label: 'Hermitage', value: WonderType.HERMITAGE },
-      { label: 'Oxford University', value: WonderType.OXFORD_UNIVERSITY },
-      { label: 'Ruhr Valley', value: WonderType.RUHR_VALLEY },
-      { label: 'Statue of Liberty', value: WonderType.STATUE_OF_LIBERTY },
-    ],
-    modern: [
-      { label: 'Broadway', value: WonderType.BROADWAY },
-      { label: 'Cristo Redentor', value: WonderType.CRISTO_REDENTOR },
-      { label: 'Eiffel Tower', value: WonderType.EIFFEL_TOWER },
-      { label: 'Golden Gate Bridge', value: WonderType.GOLDEN_GATE_BRIDGE },
-      { label: 'Panama Canal', value: WonderType.PANAMA_CANAL },
-    ],
-    atomic: [
-      { label: 'Biosphere', value: WonderType.BIOSPHERE },
-      { label: 'Estádio do Maracanã', value: WonderType.ESTÁDIO_DO_MARACANÃ },
-      { label: 'Sydney Opera House', value: WonderType.SYDNEY_OPERA_HOUSE },
-    ],
-    information: [
-      { label: 'Amundsen-Scott Research Station', value: WonderType.AMUNDSEN_SCOTT_RESEARCH_STATION },
-    ],
-  };
-
-  const eraLabels: Record<string, string> = {
-    ancient: 'Ancient',
-    classical: 'Classical',
-    medieval: 'Medieval',
-    renaissance: 'Renaissance',
-    industrial: 'Industrial',
-    modern: 'Modern',
-    atomic: 'Atomic',
-    information: 'Info',
-  };
 
   return (
     <div className="panel">
@@ -316,15 +225,11 @@ export const TileEditor: React.FC<TileEditorProps> = ({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label">Terrain</label>
-            <select
-              className="select"
+            <IconSelect
+              options={terrainOptionsWithIcons}
               value={tile.terrain}
-              onChange={(e) => onSetTerrainType(e.target.value as TerrainType)}
-            >
-              {terrainOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+              onChange={(value) => onSetTerrainType(value as TerrainType)}
+            />
           </div>
           <div>
             <label className="label">Elevation</label>
@@ -334,7 +239,7 @@ export const TileEditor: React.FC<TileEditorProps> = ({
               onChange={(e) => onSetModifier(e.target.value as TerrainModifier)}
               disabled={tile.isWater}
             >
-              {modifierOptions.map(opt => (
+              {MODIFIER_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
@@ -351,7 +256,7 @@ export const TileEditor: React.FC<TileEditorProps> = ({
             className="select"
             value={tile.feature}
             onChange={(e) => onSetFeature(e.target.value as FeatureType)}
-            disabled={tile.isMountain || tile.hasDistrict}
+            disabled={tile.isMountain}
           >
             {featureOptions.map(opt => (
               <option key={opt.value} value={opt.value} disabled={opt.disabled}>
@@ -372,7 +277,7 @@ export const TileEditor: React.FC<TileEditorProps> = ({
             value={tile.resource}
             onChange={(e) => onSetResource(e.target.value as ResourceType)}
           >
-            {resourceOptions.map(opt => (
+            {RESOURCE_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
@@ -390,7 +295,7 @@ export const TileEditor: React.FC<TileEditorProps> = ({
             onChange={(e) => onSetDistrict(e.target.value as DistrictType)}
             disabled={tile.isMountain}
           >
-            {districtOptions.map(opt => (
+            {DISTRICT_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
@@ -412,7 +317,7 @@ export const TileEditor: React.FC<TileEditorProps> = ({
           
           {/* Era Tabs */}
           <div className="flex flex-wrap gap-1 mb-2">
-            {Object.keys(wondersByEra).map(era => (
+            {Object.keys(WONDERS_BY_ERA).map(era => (
               <button
                 key={era}
                 onClick={() => setSelectedEra(era)}
@@ -422,7 +327,7 @@ export const TileEditor: React.FC<TileEditorProps> = ({
                     : 'bg-civ-surface border border-civ-border text-gray-400 hover:bg-civ-hover'
                 }`}
               >
-                {eraLabels[era]}
+                {ERA_LABELS[era]}
               </button>
             ))}
           </div>
@@ -435,15 +340,15 @@ export const TileEditor: React.FC<TileEditorProps> = ({
             disabled={tile.isMountain || tile.isWater}
           >
             <option value={WonderType.NONE}>None</option>
-            {wondersByEra[selectedEra as keyof typeof wondersByEra].map(opt => (
+            {WONDERS_BY_ERA[selectedEra as keyof typeof WONDERS_BY_ERA].map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
           
           {/* Current wonder indicator if from different era */}
-          {tile.wonder !== WonderType.NONE && !wondersByEra[selectedEra as keyof typeof wondersByEra].some(w => w.value === tile.wonder) && (
+          {tile.wonder !== WonderType.NONE && !WONDERS_BY_ERA[selectedEra as keyof typeof WONDERS_BY_ERA].some(w => w.value === tile.wonder) && (
             <div className="mt-1 text-xs text-civ-accent">
-              ✨ Current: {Object.values(wondersByEra).flat().find(w => w.value === tile.wonder)?.label || tile.wonder}
+              ✨ Current: {ALL_WONDERS.find(w => w.value === tile.wonder)?.label || tile.wonder}
             </div>
           )}
         </div>

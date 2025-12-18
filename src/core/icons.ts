@@ -30,15 +30,15 @@ export const DISTRICT_ICONS = {
   entertainment_complex: '/icons/districts/entertainment_complex.webp',
   water_park: '/icons/districts/entertainment_complex.webp',
   aqueduct: '/icons/districts/aqueduct.webp',
-  neighborhood: '/icons/districts/entertainment_complex.webp', // Using entertainment as fallback
+  neighborhood: '/icons/districts/neighborhood.webp',
   spaceport: '/icons/districts/spaceport.webp',
   aerodrome: '/icons/districts/aerodrome.webp',
   encampment: '/icons/districts/encampment.webp',
-  government_plaza: '/icons/districts/city_center.webp', // Using city center as fallback
-  diplomatic_quarter: '/icons/districts/city_center.webp', // Using city center as fallback
-  preserve: '/icons/districts/entertainment_complex.webp', // Using entertainment as fallback
-  dam: '/icons/districts/aqueduct.webp', // Using aqueduct as fallback
-  canal: '/icons/districts/harbor.webp', // Using harbor as fallback
+  government_plaza: '/icons/districts/government_plaza.webp',
+  diplomatic_quarter: '/icons/districts/diplomatic_quarter.webp',
+  preserve: '/icons/districts/preserve.webp', 
+  dam: '/icons/districts/dam.webp',
+  canal: '/icons/districts/canal.webp',
   street_carnival: '/icons/districts/street_carnival.webp',
   // Unique districts
   hansa: '/icons/districts/hansa.webp',
@@ -183,6 +183,7 @@ export const WONDER_ICONS = {
   pyramids: '/icons/player_wonders/pyramids.webp',
   hanging_gardens: '/icons/player_wonders/hanging_gardens.webp',
   oracle: '/icons/player_wonders/oracle.webp',
+  temple_of_artemis: '/icons/player_wonders/temple_of_artemis.webp',
   // Classical Era
   colosseum: '/icons/player_wonders/colosseum.webp',
   colossus: '/icons/player_wonders/colossus.webp',
@@ -202,6 +203,7 @@ export const WONDER_ICONS = {
   huey_teocalli: '/icons/player_wonders/huey_teocalli.webp',
   potala_palace: '/icons/player_wonders/potala_palace.webp',
   venetian_arsenal: '/icons/player_wonders/venetian_arsenal.webp',
+  taj_mahal: 'icons/player_wonders/taj_mahal.webp',
   // Industrial Era
   big_ben: '/icons/player_wonders/big_ben.webp',
   bolshoi_theatre: '/icons/player_wonders/bolshoi_theatre.webp',
@@ -241,12 +243,12 @@ export const NATURAL_WONDER_ICONS = {
 // ============================================================================
 
 export const YIELD_ICONS = {
-  food: '/icons/terrain/grass.webp',
-  production: '/icons/terrain/mountain.webp',
-  gold: '/icons/terrain/desert.webp',
-  science: '/icons/terrain/coast.webp',
-  culture: '/icons/terrain/jungle.webp',
-  faith: '/icons/terrain/tundra.webp',
+  food: '/icons/statistics/food.webp',
+  production: '/icons/statistics/production.webp',
+  gold: '/icons/statistics/gold.webp',
+  science: '/icons/statistics/science.webp',
+  culture: '/icons/statistics/culture.webp',
+  faith: '/icons/statistics/faith.webp',
 } as const;
 
 // ============================================================================
