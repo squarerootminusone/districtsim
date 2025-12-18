@@ -118,10 +118,13 @@ export class Tile {
   }
 
   setFeature(feature: FeatureType): this {
-    // Validate feature placement
-    const featureData = FEATURE_DATA[feature];
-    if (featureData && !featureData.validTerrains.includes(this._terrain)) {
-      throw new Error(`${feature} cannot be placed on ${this._terrain}`);
+    // Skip validation for NONE (clearing feature)
+    if (feature !== FeatureType.NONE) {
+      // Validate feature placement
+      const featureData = FEATURE_DATA[feature];
+      if (featureData && !featureData.validTerrains.includes(this._terrain)) {
+        throw new Error(`${feature} cannot be placed on ${this._terrain}`);
+      }
     }
     
     this._feature = feature;

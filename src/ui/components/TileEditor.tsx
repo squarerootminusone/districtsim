@@ -23,7 +23,8 @@ interface TileEditorProps {
   tile: Tile | null;
   selectedCount?: number;
   cityCenter: HexCoord | null;
-  onSetTerrain: (terrain: TerrainType, modifier?: TerrainModifier) => void;
+  onSetTerrainType: (terrain: TerrainType) => void;  // Only changes terrain, preserves modifier
+  onSetModifier: (modifier: TerrainModifier) => void;  // Only changes modifier, preserves terrain
   onSetFeature: (feature: FeatureType) => void;
   onSetResource: (resource: ResourceType) => void;
   onSetDistrict: (district: DistrictType) => void;
@@ -89,7 +90,8 @@ export const TileEditor: React.FC<TileEditorProps> = ({
   tile,
   selectedCount = 1,
   cityCenter,
-  onSetTerrain,
+  onSetTerrainType,
+  onSetModifier,
   onSetFeature,
   onSetResource,
   onSetDistrict,
@@ -317,7 +319,7 @@ export const TileEditor: React.FC<TileEditorProps> = ({
             <select
               className="select"
               value={tile.terrain}
-              onChange={(e) => onSetTerrain(e.target.value as TerrainType, tile.modifier)}
+              onChange={(e) => onSetTerrainType(e.target.value as TerrainType)}
             >
               {terrainOptions.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -329,7 +331,7 @@ export const TileEditor: React.FC<TileEditorProps> = ({
             <select
               className="select"
               value={tile.modifier}
-              onChange={(e) => onSetTerrain(tile.terrain, e.target.value as TerrainModifier)}
+              onChange={(e) => onSetModifier(e.target.value as TerrainModifier)}
               disabled={tile.isWater}
             >
               {modifierOptions.map(opt => (

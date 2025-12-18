@@ -65,6 +65,8 @@ export interface MapActions {
   
   // Bulk editing for selected tiles
   setSelectedTilesTerrain: (terrain: TerrainType, modifier?: TerrainModifier) => void;
+  setSelectedTilesTerrainType: (terrain: TerrainType) => void;  // Only changes terrain, preserves modifier
+  setSelectedTilesModifier: (modifier: TerrainModifier) => void;  // Only changes modifier, preserves terrain
   setSelectedTilesFeature: (feature: FeatureType) => void;
   setSelectedTilesResource: (resource: ResourceType) => void;
   setSelectedTilesDistrict: (district: DistrictType) => void;
@@ -371,6 +373,16 @@ export function useMapState(initialWidth = 12, initialHeight = 10): [MapState, M
     updateSelectedTiles(tile => tile.setTerrain(terrain, modifier));
   }, [updateSelectedTiles]);
 
+  // Only changes terrain type, preserves each tile's existing modifier
+  const setSelectedTilesTerrainType = useCallback((terrain: TerrainType) => {
+    updateSelectedTiles(tile => tile.setTerrain(terrain, tile.modifier));
+  }, [updateSelectedTiles]);
+
+  // Only changes modifier, preserves each tile's existing terrain
+  const setSelectedTilesModifier = useCallback((modifier: TerrainModifier) => {
+    updateSelectedTiles(tile => tile.setTerrain(tile.terrain, modifier));
+  }, [updateSelectedTiles]);
+
   const setSelectedTilesFeature = useCallback((feature: FeatureType) => {
     updateSelectedTiles(tile => tile.setFeature(feature));
   }, [updateSelectedTiles]);
@@ -469,6 +481,8 @@ export function useMapState(initialWidth = 12, initialHeight = 10): [MapState, M
     setTileWonder,
     toggleRiverEdge,
     setSelectedTilesTerrain,
+    setSelectedTilesTerrainType,
+    setSelectedTilesModifier,
     setSelectedTilesFeature,
     setSelectedTilesResource,
     setSelectedTilesDistrict,

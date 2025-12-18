@@ -10,6 +10,7 @@ import { TileEditor } from './components/TileEditor';
 import { AdjacencyPanel } from './components/AdjacencyPanel';
 import { Toolbar } from './components/Toolbar';
 import { useMapState } from './hooks/useMapState';
+import { TerrainType } from '../core';
 
 export const App: React.FC = () => {
   const [state, actions] = useMapState(12, 10);
@@ -88,11 +89,18 @@ export const App: React.FC = () => {
               tile={state.selectedTile}
               selectedCount={state.selectedCoords.length}
               cityCenter={state.cityCenter}
-              onSetTerrain={(terrain, modifier) => {
+              onSetTerrainType={(terrain) => {
                 if (state.selectedCoords.length > 1) {
-                  actions.setSelectedTilesTerrain(terrain, modifier);
+                  actions.setSelectedTilesTerrainType(terrain);
                 } else if (state.selectedCoord) {
-                  actions.setTileTerrain(state.selectedCoord, terrain, modifier);
+                  actions.setTileTerrain(state.selectedCoord, terrain, state.selectedTile?.modifier);
+                }
+              }}
+              onSetModifier={(modifier) => {
+                if (state.selectedCoords.length > 1) {
+                  actions.setSelectedTilesModifier(modifier);
+                } else if (state.selectedCoord) {
+                  actions.setTileTerrain(state.selectedCoord, state.selectedTile?.terrain ?? TerrainType.GRASS, modifier);
                 }
               }}
               onSetFeature={(feature) => {
