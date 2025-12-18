@@ -180,14 +180,22 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+The **source code** in this repository is licensed under the MIT License — see [LICENSE](LICENSE) for details.
+
+### Third-Party Assets (Not Covered by MIT)
+
+The icons in `public/icons/` are property of **Firaxis Games** and **2K Games** (Civilization VI). These assets are **NOT** covered by the MIT license and are included here for non-commercial, educational, and fan project purposes only. They remain the intellectual property of their respective owners.
+
+- Game data and icons sourced from the [Civilization VI Wiki](https://civilization.fandom.com/):
+  - [District Icons](https://civilization.fandom.com/wiki/Category:District_icons_(Civ6))
+  - [Terrain Icons](https://civilization.fandom.com/wiki/Category:Terrain_icons_(Civ6))
+  - [Resource Icons](https://civilization.fandom.com/wiki/Category:Resource_icons_(Civ6))
+  - [Yield Icons](https://civilization.fandom.com/wiki/Category:Yield_icons_(Civ6))
+
+If you are a copyright holder and have concerns about the use of these assets, please open an issue.
 
 ## Acknowledgments
 
-- Civilization 6 and all related assets are property of Firaxis Games and 2K Games
-- Game data and icons sourced from the [Civilization VI Wiki](https://civ6.fandom.com/):
-  - [District Icons](https://civ6.fandom.com/wiki/Category:District_icons)
-  - [Terrain Icons](https://civ6.fandom.com/wiki/Category:Terrain_icons)
-  - [Resource Icons](https://civ6.fandom.com/wiki/Category:Resource_icons)
-  - [Yield Icons](https://civ6.fandom.com/wiki/Category:Yield_icons)
+- Civilization VI and all related game content © Firaxis Games / 2K Games
+- This is an unofficial fan project and is not affiliated with or endorsed by Firaxis or 2K
 

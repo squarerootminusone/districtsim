@@ -19,3 +19,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+THIRD-PARTY ASSETS EXCLUSION
+
+The above license applies ONLY to the source code in this repository.
+
+The icons and graphical assets in the public/icons/ directory are property of
+Firaxis Games and 2K Games (Civilization VI) and are NOT covered by this MIT
+license. These assets are included for non-commercial, educational, and fan
+project purposes only and remain the intellectual property of their respective
+copyright holders.
