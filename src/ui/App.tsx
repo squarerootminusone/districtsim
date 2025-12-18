@@ -122,8 +122,8 @@ export const App: React.FC = () => {
                 }
               }}
               onToggleRiverEdge={(edge) => {
-                if (state.selectedCoord) {
-                  actions.toggleRiverEdge(state.selectedCoord, edge);
+                if (state.selectedCoords.length > 0) {
+                  actions.toggleSelectedTilesRiverEdge(edge);
                 }
               }}
               onSetCityCenter={() => {

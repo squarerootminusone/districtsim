@@ -140,22 +140,24 @@ export const HexMap: React.FC<HexMapProps> = ({
   }, [map, hexToScreen]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    // Middle mouse or right-click or shift = pan
-    if (e.button === 1 || e.button === 2 || e.shiftKey) {
-      setIsDragging(true);
-      setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
-      e.preventDefault();
-      return;
-    }
-    
-    // Left-click = start selection drag
-    if (e.button === 0) {
+    // Shift+left-click or right-click = start selection drag
+    if ((e.button === 0 && e.shiftKey) || e.button === 2) {
       const svgPos = screenToSvg(e.clientX, e.clientY);
       if (svgPos) {
         setIsSelecting(true);
         setSelectionStart(svgPos);
         setSelectionEnd(svgPos);
       }
+      e.preventDefault();
+      return;
+    }
+    
+    // Left-click or middle mouse = pan
+    if (e.button === 0 || e.button === 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+      e.preventDefault();
+      return;
     }
   }, [panOffset, screenToSvg]);
 
@@ -178,7 +180,26 @@ export const HexMap: React.FC<HexMapProps> = ({
 
   const handleMouseUp = useCallback((e: React.MouseEvent) => {
     if (isDragging) {
+      // Check if it was a drag or just a click (for single tile selection)
+      const dx = Math.abs(e.clientX - (dragStart.x + panOffset.x));
+      const dy = Math.abs(e.clientY - (dragStart.y + panOffset.y));
+      
       setIsDragging(false);
+      
+      // If minimal movement, treat as a click for tile selection
+      if (dx < 5 && dy < 5 && e.button === 0) {
+        const svgPos = screenToSvg(e.clientX, e.clientY);
+        if (svgPos) {
+          const hex = findHexAtPosition(svgPos.x, svgPos.y);
+          if (hex) {
+            if (e.ctrlKey || e.metaKey) {
+              onAddToSelection(hex);
+            } else {
+              onTileSelect(hex);
+            }
+          }
+        }
+      }
       return;
     }
     
@@ -187,19 +208,7 @@ export const HexMap: React.FC<HexMapProps> = ({
       const dx = Math.abs(selectionEnd.x - selectionStart.x);
       const dy = Math.abs(selectionEnd.y - selectionStart.y);
       
-      if (dx < 5 && dy < 5) {
-        // It was a click, select single tile
-        const hex = findHexAtPosition(selectionStart.x, selectionStart.y);
-        if (hex) {
-          if (e.ctrlKey || e.metaKey) {
-            // Add to selection with Ctrl/Cmd
-            onAddToSelection(hex);
-          } else {
-            // Single selection
-            onTileSelect(hex);
-          }
-        }
-      } else {
+      if (dx > 5 || dy > 5) {
         // It was a drag, select all tiles in rectangle
         const hexes = getHexesInRect(selectionStart.x, selectionStart.y, selectionEnd.x, selectionEnd.y);
         if (hexes.length > 0) {
@@ -211,7 +220,7 @@ export const HexMap: React.FC<HexMapProps> = ({
       setSelectionStart(null);
       setSelectionEnd(null);
     }
-  }, [isDragging, isSelecting, selectionStart, selectionEnd, findHexAtPosition, getHexesInRect, onTileSelect, onAddToSelection, onSetSelection]);
+  }, [isDragging, isSelecting, selectionStart, selectionEnd, dragStart, panOffset, screenToSvg, findHexAtPosition, getHexesInRect, onTileSelect, onAddToSelection, onSetSelection]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -501,7 +510,7 @@ export const HexMap: React.FC<HexMapProps> = ({
       className="w-full h-full overflow-hidden relative"
       style={{
         background: 'radial-gradient(ellipse at center, #1a2a3a 0%, #0a1420 70%, #050a10 100%)',
-        cursor: isDragging ? 'grabbing' : isSelecting ? 'crosshair' : 'default',
+        cursor: isDragging ? 'grabbing' : isSelecting ? 'crosshair' : 'grab',
       }}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
@@ -552,7 +561,7 @@ export const HexMap: React.FC<HexMapProps> = ({
       
       {/* Instructions */}
       <div className="absolute bottom-4 left-4 px-3 py-2 bg-black/70 backdrop-blur-sm rounded-lg text-white/80 text-xs border border-white/10">
-        🖱️ Drag to select multiple • Ctrl+Click to add • Shift+Drag to pan • Scroll to zoom
+        🖱️ Drag to pan • Click to select • Right-drag to select multiple • Ctrl+Z undo • Ctrl+X redo
       </div>
     </div>
   );

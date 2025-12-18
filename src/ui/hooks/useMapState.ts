@@ -2,7 +2,7 @@
  * React hook for managing game map state
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   GameMap,
   AdjacencyEngine,
@@ -16,6 +16,15 @@ import {
   WonderType,
   CityAdjacencyResult,
 } from '../../core';
+
+const MAX_HISTORY_SIZE = 50;
+const LOCAL_STORAGE_KEY = 'districtsim_map';
+const LOCAL_STORAGE_CAMERA_KEY = 'districtsim_camera';
+
+interface CameraState {
+  zoom: number;
+  panOffset: { x: number; y: number };
+}
 
 export interface MapState {
   map: GameMap;
@@ -33,6 +42,12 @@ export interface MapActions {
   createNewMap: (width: number, height: number, name?: string) => void;
   loadMap: (jsonString: string) => void;
   exportMap: () => string;
+  
+  // Undo/Redo
+  undo: () => void;
+  redo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
   
   // Tile selection
   selectTile: (coord: HexCoord | null) => void;
@@ -53,6 +68,7 @@ export interface MapActions {
   setSelectedTilesFeature: (feature: FeatureType) => void;
   setSelectedTilesResource: (resource: ResourceType) => void;
   setSelectedTilesDistrict: (district: DistrictType) => void;
+  toggleSelectedTilesRiverEdge: (edge: number) => void;
   
   // City management
   setCityCenter: (coord: HexCoord | null) => void;
@@ -65,14 +81,73 @@ export interface MapActions {
   calculateAdjacency: () => void;
 }
 
+// Load camera state from localStorage
+function loadCameraState(): CameraState {
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_CAMERA_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved) as CameraState;
+      return {
+        zoom: parsed.zoom ?? 1,
+        panOffset: parsed.panOffset ?? { x: 0, y: 0 },
+      };
+    }
+  } catch (error) {
+    console.warn('Failed to load camera state from localStorage:', error);
+  }
+  return { zoom: 1, panOffset: { x: 0, y: 0 } };
+}
+
+// Load map from localStorage or create new
+function loadInitialMap(initialWidth: number, initialHeight: number): { map: GameMap; cityCenter: HexCoord | null } {
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) {
+      const loadedMap = GameMap.importFromString(saved);
+      const cityCenterTile = loadedMap.findCityCenter();
+      return { map: loadedMap, cityCenter: cityCenterTile?.coord || null };
+    }
+  } catch (error) {
+    console.warn('Failed to load map from localStorage:', error);
+  }
+  return { map: new GameMap(initialWidth, initialHeight, 'Untitled Map'), cityCenter: null };
+}
+
 export function useMapState(initialWidth = 12, initialHeight = 10): [MapState, MapActions] {
-  const [map, setMap] = useState<GameMap>(() => new GameMap(initialWidth, initialHeight, 'Untitled Map'));
+  const [initialState] = useState(() => loadInitialMap(initialWidth, initialHeight));
+  const [initialCamera] = useState(() => loadCameraState());
+  const [map, setMap] = useState<GameMap>(initialState.map);
   const [selectedCoord, setSelectedCoord] = useState<HexCoord | null>(null);
   const [selectedCoords, setSelectedCoords] = useState<HexCoord[]>([]);
-  const [cityCenter, setCityCenterState] = useState<HexCoord | null>(null);
-  const [zoom, setZoomState] = useState(1);
-  const [panOffset, setPanOffsetState] = useState({ x: 0, y: 0 });
+  const [cityCenter, setCityCenterState] = useState<HexCoord | null>(initialState.cityCenter);
+  const [zoom, setZoomState] = useState(initialCamera.zoom);
+  const [panOffset, setPanOffsetState] = useState(initialCamera.panOffset);
   const [adjacencyResult, setAdjacencyResult] = useState<CityAdjacencyResult | null>(null);
+  
+  // Undo/Redo history
+  const [undoStack, setUndoStack] = useState<string[]>([]);
+  const [redoStack, setRedoStack] = useState<string[]>([]);
+  const isUndoRedoAction = useRef(false);
+  
+  // Save map to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      const mapData = map.exportToString();
+      localStorage.setItem(LOCAL_STORAGE_KEY, mapData);
+    } catch (error) {
+      console.warn('Failed to save map to localStorage:', error);
+    }
+  }, [map]);
+  
+  // Save camera state to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      const cameraData: CameraState = { zoom, panOffset };
+      localStorage.setItem(LOCAL_STORAGE_CAMERA_KEY, JSON.stringify(cameraData));
+    } catch (error) {
+      console.warn('Failed to save camera state to localStorage:', error);
+    }
+  }, [zoom, panOffset]);
 
   const selectedTile = useMemo(() => {
     if (!selectedCoord) return null;
@@ -80,6 +155,100 @@ export function useMapState(initialWidth = 12, initialHeight = 10): [MapState, M
   }, [map, selectedCoord]);
 
   const engine = useMemo(() => new AdjacencyEngine(map), [map]);
+
+  // Save state to undo stack before modifications
+  const saveToHistory = useCallback(() => {
+    if (isUndoRedoAction.current) return;
+    const snapshot = map.exportToString();
+    setUndoStack(prev => {
+      const newStack = [...prev, snapshot];
+      if (newStack.length > MAX_HISTORY_SIZE) {
+        return newStack.slice(-MAX_HISTORY_SIZE);
+      }
+      return newStack;
+    });
+    setRedoStack([]); // Clear redo stack on new action
+  }, [map]);
+
+  // Wrapper for setMap that saves history
+  const setMapWithHistory = useCallback((updater: (prev: GameMap) => GameMap) => {
+    if (!isUndoRedoAction.current) {
+      saveToHistory();
+    }
+    setMap(updater);
+  }, [saveToHistory]);
+
+  // Undo action
+  const undo = useCallback(() => {
+    if (undoStack.length === 0) return;
+    
+    isUndoRedoAction.current = true;
+    
+    // Save current state to redo stack
+    const currentSnapshot = map.exportToString();
+    setRedoStack(prev => [...prev, currentSnapshot]);
+    
+    // Pop from undo stack and restore
+    const prevSnapshot = undoStack[undoStack.length - 1];
+    setUndoStack(prev => prev.slice(0, -1));
+    
+    try {
+      const restoredMap = GameMap.importFromString(prevSnapshot);
+      setMap(restoredMap);
+      
+      // Find and restore city center
+      const cityCenterTile = restoredMap.findCityCenter();
+      setCityCenterState(cityCenterTile?.coord || null);
+    } catch (error) {
+      console.error('Failed to undo:', error);
+    }
+    
+    isUndoRedoAction.current = false;
+  }, [undoStack, map]);
+
+  // Redo action
+  const redo = useCallback(() => {
+    if (redoStack.length === 0) return;
+    
+    isUndoRedoAction.current = true;
+    
+    // Save current state to undo stack
+    const currentSnapshot = map.exportToString();
+    setUndoStack(prev => [...prev, currentSnapshot]);
+    
+    // Pop from redo stack and restore
+    const nextSnapshot = redoStack[redoStack.length - 1];
+    setRedoStack(prev => prev.slice(0, -1));
+    
+    try {
+      const restoredMap = GameMap.importFromString(nextSnapshot);
+      setMap(restoredMap);
+      
+      // Find and restore city center
+      const cityCenterTile = restoredMap.findCityCenter();
+      setCityCenterState(cityCenterTile?.coord || null);
+    } catch (error) {
+      console.error('Failed to redo:', error);
+    }
+    
+    isUndoRedoAction.current = false;
+  }, [redoStack, map]);
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        undo();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'x') {
+        e.preventDefault();
+        redo();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo, redo]);
 
   // Map management
   const createNewMap = useCallback((width: number, height: number, name = 'Untitled Map') => {
@@ -146,12 +315,12 @@ export function useMapState(initialWidth = 12, initialHeight = 10): [MapState, M
     
     updater(tile);
     
-    // Force re-render by creating new map reference
-    setMap(prevMap => {
+    // Force re-render by creating new map reference (with history)
+    setMapWithHistory(prevMap => {
       const data = prevMap.toJSON();
       return GameMap.fromJSON(data);
     });
-  }, [map]);
+  }, [map, setMapWithHistory]);
 
   const setTileTerrain = useCallback((coord: HexCoord, terrain: TerrainType, modifier = TerrainModifier.FLAT) => {
     updateTile(coord, tile => tile.setTerrain(terrain, modifier));
@@ -194,9 +363,9 @@ export function useMapState(initialWidth = 12, initialHeight = 10): [MapState, M
       }
     }
     
-    // Force re-render by creating new map reference
-    setMap(prevMap => GameMap.fromJSON(prevMap.toJSON()));
-  }, [map, selectedCoords]);
+    // Force re-render by creating new map reference (with history)
+    setMapWithHistory(prevMap => GameMap.fromJSON(prevMap.toJSON()));
+  }, [map, selectedCoords, setMapWithHistory]);
 
   const setSelectedTilesTerrain = useCallback((terrain: TerrainType, modifier = TerrainModifier.FLAT) => {
     updateSelectedTiles(tile => tile.setTerrain(terrain, modifier));
@@ -212,6 +381,16 @@ export function useMapState(initialWidth = 12, initialHeight = 10): [MapState, M
 
   const setSelectedTilesDistrict = useCallback((district: DistrictType) => {
     updateSelectedTiles(tile => tile.setDistrict(district));
+  }, [updateSelectedTiles]);
+
+  const toggleSelectedTilesRiverEdge = useCallback((edge: number) => {
+    updateSelectedTiles(tile => {
+      if (tile.riverEdges.has(edge)) {
+        tile.removeRiverEdge(edge);
+      } else {
+        tile.addRiverEdge(edge);
+      }
+    });
   }, [updateSelectedTiles]);
 
   // City management
@@ -236,9 +415,9 @@ export function useMapState(initialWidth = 12, initialHeight = 10): [MapState, M
     setCityCenterState(coord);
     setAdjacencyResult(null);
     
-    // Force re-render
-    setMap(prevMap => GameMap.fromJSON(prevMap.toJSON()));
-  }, [map, cityCenter]);
+    // Force re-render (with history)
+    setMapWithHistory(prevMap => GameMap.fromJSON(prevMap.toJSON()));
+  }, [map, cityCenter, setMapWithHistory]);
 
   // View controls
   const setZoom = useCallback((newZoom: number) => {
@@ -275,6 +454,10 @@ export function useMapState(initialWidth = 12, initialHeight = 10): [MapState, M
     createNewMap,
     loadMap,
     exportMap,
+    undo,
+    redo,
+    canUndo: undoStack.length > 0,
+    canRedo: redoStack.length > 0,
     selectTile,
     addToSelection,
     clearSelection,
@@ -289,6 +472,7 @@ export function useMapState(initialWidth = 12, initialHeight = 10): [MapState, M
     setSelectedTilesFeature,
     setSelectedTilesResource,
     setSelectedTilesDistrict,
+    toggleSelectedTilesRiverEdge,
     setCityCenter,
     setZoom,
     setPanOffset,
